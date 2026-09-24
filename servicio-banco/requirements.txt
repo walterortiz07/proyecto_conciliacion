@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 jinja2
 psycopg[binary]
-passlib[bcrypt]
+bcrypt
 itsdangerous
 python-multipart
 httpx

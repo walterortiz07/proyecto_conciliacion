@@ -17,17 +17,28 @@ un token compartido.
 
 ## Puesta en marcha
 
-1. PostgreSQL con tres bases, una por servicio.
-2. Copiar el `.env.example` de cada servicio a `.env` y completarlo: cadena
-   de conexion, clave de sesion, primer usuario y el mismo `TOKEN_SERVICIO`
-   en los tres.
-3. Instalar dependencias (`pip install -r requirements.txt`) y arrancar en
-   orden: primero `servicio-pyme` y `servicio-banco`, despues
-   `servicio-conciliador` (al iniciar sincroniza los bloques que le falten).
+### Todo junto (recomendado)
 
-Cada servicio aplica su migracion y crea su primer usuario al arrancar
-(`python -m app.inicio`). En un solo servidor tambien se pueden levantar los
-tres con `docker-compose` desde la carpeta de cada uno.
+```
+cp .env.example .env      # opcional: todas las variables tienen valor por defecto
+docker compose up -d --build
+```
+
+Levanta PostgreSQL con las tres bases y los tres servicios en una red
+interna. El primer arranque crea las bases; despues cada servicio aplica su
+migracion y crea su usuario administrador por su cuenta.
+
+En **Coolify** alcanza con un unico recurso de tipo *Docker Compose* desde
+este repositorio. Los dominios se asignan definiendo `SERVICE_FQDN_PYME_8001`,
+`SERVICE_FQDN_BANCO_8002` y `SERVICE_FQDN_CONCILIADOR_8000` con la URL de cada
+uno; si no se definen, Coolify genera uno por servicio. Para entrar desde el
+navegador en una instalacion local, descomentar la linea `ports:` del servicio
+correspondiente en el compose.
+
+### Un servicio suelto
+
+Cada carpeta trae su Dockerfile, su `.env.example` y su `docker-compose.yml`
+para levantarlo por separado y conectarlo a otra base.
 
 ## Pruebas
 

@@ -38,7 +38,7 @@ def resumen():
 
 def proxima_referencia():
     fila = db.consultar_uno(
-        "SELECT COUNT(*) AS total FROM movimientos WHERE referencia LIKE 'FV-%'")
+        "SELECT COUNT(*) AS total FROM movimientos WHERE referencia LIKE 'FV-%%'")
     return "FV-%04d" % (4001 + (fila["total"] if fila else 0))
 
 

@@ -10,7 +10,7 @@ externas ni cifrado de contenido. Los calculos son:
     (fecha | monto | referencia en mayusculas | descripcion),
   * huella_raiz: SHA-256 de la concatenacion de las huellas del lote,
   * huella_archivo: SHA-256 del contenido exacto del archivo,
-  * huella_bloque: SHA-256 del bloque ordenado por clave (sin ese campo),
+  * huella_bloque: SHA-256 de los campos sellados, ordenados por clave,
   * encadenamiento: cada bloque referencia `hash_anterior` = huella del
     bloque previo; el primer bloque usa 64 ceros.
 
@@ -48,9 +48,22 @@ def huella_archivo(contenido):
     return huella(contenido)
 
 
+CAMPOS_SELLADOS = ("indice", "origen", "lote_codigo", "archivo", "n_movimientos",
+                   "hashes_movimientos", "hash_raiz", "hash_archivo",
+                   "hash_anterior", "emitido_por", "sellado_en")
+
+# Campos que viajan al propagar el bloque: los sellados mas la huella misma.
+CAMPOS_BLOQUE = CAMPOS_SELLADOS + ("hash_bloque",)
+
+
 def huella_bloque(bloque):
-    """Huella del bloque: su JSON ordenado por clave, sin el campo huella."""
-    contenido = {k: v for k, v in bloque.items() if k != "hash_bloque"}
+    """Huella del bloque: sus campos sellados, en JSON ordenado por clave.
+
+    Se toman unicamente los campos de CAMPOS_SELLADOS. La fila guardada en la
+    base trae ademas su id y otras columnas de control, que no son parte del
+    sello y no deben entrar en el calculo.
+    """
+    contenido = {campo: bloque[campo] for campo in CAMPOS_SELLADOS}
     return huella(json.dumps(contenido, sort_keys=True))
 
 

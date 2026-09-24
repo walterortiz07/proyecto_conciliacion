@@ -22,9 +22,8 @@ import httpx
 from app import alertas, config, db
 from app.nucleo import sellos
 
-CAMPOS_BLOQUE = ("indice", "origen", "lote_codigo", "archivo", "n_movimientos",
-                 "hashes_movimientos", "hash_raiz", "hash_archivo",
-                 "hash_anterior", "hash_bloque", "emitido_por", "sellado_en")
+# Forma del bloque (campos sellados mas la huella), definida en el nucleo.
+CAMPOS_BLOQUE = sellos.CAMPOS_BLOQUE
 
 
 def ultimo_bloque():
@@ -152,8 +151,7 @@ def sello_de_lote(lote_codigo):
 
 def verificar_cadena_local():
     """Chequeo (a): recorre la copia local y devuelve los problemas."""
-    filas = db.consultar(
-        "SELECT indice, hash_anterior, hash_bloque FROM bloques ORDER BY indice")
+    filas = db.consultar("SELECT * FROM bloques ORDER BY indice")
     return sellos.verificar_cadena([dict(f) for f in filas])
 
 

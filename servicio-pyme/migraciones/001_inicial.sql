@@ -86,7 +86,7 @@ CREATE TABLE bloques (
     hash_anterior       CHAR(64) NOT NULL,
     hash_bloque         CHAR(64) NOT NULL UNIQUE,
     emitido_por         BIGINT REFERENCES usuarios(id),
-    sellado_en          TIMESTAMPTZ NOT NULL,
+    sellado_en          TEXT NOT NULL,          -- instante ISO: entra en la huella
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );

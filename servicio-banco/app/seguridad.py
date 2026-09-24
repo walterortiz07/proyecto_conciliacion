@@ -3,7 +3,7 @@
 
 Autenticacion y sesiones.
 
-  * Las claves se guardan con bcrypt (passlib): nunca la clave en claro.
+  * Las claves se guardan con bcrypt: nunca la clave en claro.
   * Al iniciar sesion se genera un token aleatorio; en la base se guarda
     solo su SHA-256 y en el navegador viaja como cookie firmada
     (itsdangerous). Asi la sesion se puede revocar desde la base.
@@ -18,25 +18,33 @@ import datetime
 import hashlib
 import secrets
 
+import bcrypt
 from fastapi import Request
 from itsdangerous import BadSignature, URLSafeSerializer
-from passlib.context import CryptContext
 
 from app import config, db
 
 CLAVE_COOKIE = "sesion_banco"
 DURACION_SESION = datetime.timedelta(hours=8)
-_cifrado = CryptContext(schemes=["bcrypt"], deprecated="auto")
+LIMITE_BCRYPT = 72   # bcrypt solo considera los primeros 72 bytes de la clave
 
 
 def hash_clave(clave):
     """Hash bcrypt de una clave (para guardar en usuarios.clave_hash)."""
-    return _cifrado.hash(clave)
+    return bcrypt.hashpw(_bytes(clave), bcrypt.gensalt()).decode("ascii")
 
 
 def verificar_clave(clave, clave_hash):
     """True si la clave coincide con el hash guardado."""
-    return _cifrado.verify(clave, clave_hash)
+    try:
+        return bcrypt.checkpw(_bytes(clave), clave_hash.encode("ascii"))
+    except ValueError:      # hash guardado con otro formato
+        return False
+
+
+def _bytes(clave):
+    """La clave en bytes, recortada al limite de bcrypt."""
+    return clave.encode("utf-8")[:LIMITE_BCRYPT]
 
 
 def _huella_token(token):
